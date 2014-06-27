@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e
+
+JAR="$1"
+OUT="$2"
+
+
+if [[ $# -ne 2 || ! -f "$JAR" ]]; then
+  echo "usage: $0 <input jar> <output executable>"
+  exit 1
+fi
+
+echo "#!$(which java) -jar" > "$OUT"
+cat "$JAR" >> "$OUT"
+chmod +x "$OUT"
