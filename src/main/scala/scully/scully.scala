@@ -12,6 +12,7 @@ object main {
       endpoints: List[String] = Nil,
       socketType: Option[SocketType] = None,
       multipart: Option[String] = None,
+      limit: Option[Int] = None,
       topic: String = "",
       hwm: Option[Long] = None,
       times: Boolean = false,
@@ -87,7 +88,7 @@ object main {
 
   def sendLoop(socket: ZMQ.Socket, options: Options) = {
     val send = sender(socket, options.mode, options.timeout,
-      options.multipart.map(sendMultipart(socket, _)).getOrElse((s: String) => socket.send(s)))
+      options.multipart.map(sendMultipart(socket, _, options.limit)).getOrElse((s: String) => socket.send(s)))
     for (line <- scala.io.Source.stdin.getLines())
       send(line)
   }
@@ -103,9 +104,14 @@ object main {
       case _ => send
     }
 
-  def sendMultipart(socket: ZMQ.Socket, separator: String): (String) => Boolean =
-    (message: String) =>
-      send(socket, message.split(separator).toList)
+  def sendMultipart(socket: ZMQ.Socket, separator: String, limit: Option[Int]): (String) => Boolean =
+    limit.map { l =>
+      (message: String) =>
+        send(socket, message.split(separator, l).toList)
+    } getOrElse {
+      (message: String) =>
+        send(socket, message.split(separator).toList)
+    }
 
   @annotation.tailrec
   def send(socket: ZMQ.Socket, parts: List[String]): Boolean = parts match {
@@ -129,6 +135,8 @@ object main {
       parseArg(rest, opts.copy(socketType = Some(SocketType(socket))))
     case ("-m"|"--multipart") :: separator :: rest =>
       parseArg(rest, opts.copy(multipart = Some(separator)))
+    case ("-l"|"--limit") :: limit :: rest =>
+      parseArg(rest, opts.copy(limit = Some(limit.toInt)))
     case ("--hwm") :: hwm :: rest =>
       parseArg(rest, opts.copy(hwm = Some(hwm.toLong)))
     case ("--topic") :: topic :: rest =>
