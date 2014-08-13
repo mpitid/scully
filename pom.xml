@@ -20,7 +20,7 @@
         <scala.major>2.10</scala.major>
         <scala.minor>4</scala.minor>
         <scala.version>${scala.major}.${scala.minor}</scala.version>
-        <jzmq.version>[2.2.2,2.3.0)</jzmq.version>
+        <jzmq.version>[4.0.4.1,5.0)</jzmq.version>
         <mainClass>${project.groupId}.main</mainClass>
     </properties>
 
@@ -33,7 +33,7 @@
 
         <dependency>
             <groupId>org.zeromq</groupId>
-            <artifactId>jzmq</artifactId>
+            <artifactId>jzmq4</artifactId>
             <version>${jzmq.version}</version>
         </dependency>
     </dependencies>
